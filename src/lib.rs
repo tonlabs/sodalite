@@ -13,11 +13,11 @@ mod test;
 
 #[cfg(feature = "rand")]
 mod rand_ {
-    use ::rand::Rng;
+    use ::rand::RngCore;
 
     fn randombytes(x: &mut [u8])
     {
-        let mut rng = ::rand::OsRng::new().unwrap();
+        let mut rng = rand::thread_rng();
         rng.fill_bytes(x);
     }
 
@@ -186,7 +186,7 @@ fn core_hsalsa20(out: &mut [u8;32], inx: &[u8;16], k: &[u8;32], c: &[u8;16])
 static SIGMA : &'static [u8;16] = b"expand 32-byte k";
 
 /// Encrypt `message` into `c_text` using `nonce` and `key` by xoring message with a stream.
-/// 
+///
 /// As a result, can be used to decrypt by passing encrypted text in `message`, and reading
 /// decrypted text from `c_text`.
 ///
@@ -264,7 +264,7 @@ pub fn stream_xsalsa20(c_stream: &mut [u8], nonce: &StreamXSalsa20Nonce, key: &S
 }
 
 /// Encrypt `message` into `c_text` using `nonce` and `key` by xoring message with a stream.
-/// 
+///
 /// As a result, can be used to decrypt by passing encrypted text in `message`, and reading
 /// decrypted text from `c_text`.
 ///
@@ -396,7 +396,7 @@ pub type SecretboxNonce = [u8;SECRETBOX_NONCE_LEN];
 /// Cipher text is returned in `c`.
 ///
 /// # Panics
-/// 
+///
 ///  - If first 32 bytes of `m` are not zero.
 ///  - If length of `c` is not the same as the length of `m`.
 pub fn secretbox(c: &mut [u8], m: &[u8], n: &SecretboxNonce, k: &SecretboxKey) -> Result<(),()>
@@ -761,7 +761,7 @@ pub fn box_(c: &mut [u8], m: &[u8], n: &BoxNonce, pk: &BoxPublicKey, sk: &BoxSec
 /// key `pk`, and the nonce `n`.
 ///
 /// # Panics
-/// 
+///
 ///  - If the first 16 bytes of `c` a not zero.
 ///  - XXX: size of `c` vs `m`?
 pub fn box_open(m : &mut [u8], c: &[u8], n: &BoxNonce, pk: &BoxPublicKey, sk: &BoxSecretKey) -> Result<(),()>
@@ -871,7 +871,7 @@ pub const HASH_LEN : usize = 64;
 pub type Hash = [u8;HASH_LEN];
 
 /// Hash the message `m`, returning the result in `out`.
-/// 
+///
 /// sha512
 pub fn hash(out: &mut Hash, mut m: &[u8])
 {
@@ -1213,14 +1213,14 @@ fn unpackneg(r: &mut [Gf;4], p: &[u8; 32]) -> Result<(),()>
 }
 
 /// verify an attached signature
-/// 
+///
 /// If verification failed, returns `Err(())`.
 /// Otherwise, returns the number of bytes in message & copies the message into `m`.
-/// 
+///
 /// # Panics:
-/// 
+///
 /// - If `m.len() != sm.len()`
-/// 
+///
 pub fn sign_attached_open(m: &mut [u8], sm : &[u8], pk: &SignPublicKey) -> Result<usize, ()>
 {
     assert_eq!(m.len(), sm.len());
